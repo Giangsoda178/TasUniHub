@@ -5,7 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { updateProfile } from 'firebase/auth';
-import { Loader2, User as UserIcon } from 'lucide-react';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -27,6 +28,7 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/components/auth-provider';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { db } from '@/lib/firebase';
 
 const profileFormSchema = z.object({
   displayName: z.string().min(2, {
@@ -47,8 +49,8 @@ export default function ProfilePage() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      displayName: user?.displayName || '',
-      email: user?.email || '',
+      displayName: '',
+      email: '',
       unit: '',
       course: '',
       campus: '',
@@ -57,17 +59,32 @@ export default function ProfilePage() {
   });
 
   useEffect(() => {
-    if (user) {
-      form.reset({
-        displayName: user.displayName || '',
-        email: user.email || '',
-        // These fields are not stored in Firebase Auth by default.
-        // We'll need a database like Firestore to persist them.
-        unit: '',
-        course: '',
-        campus: '',
-      });
+    async function fetchProfile() {
+        if (user) {
+            const userDocRef = doc(db, 'users', user.uid);
+            const userDoc = await getDoc(userDocRef);
+
+            if (userDoc.exists()) {
+                const data = userDoc.data();
+                form.reset({
+                    displayName: data.displayName || user.displayName || '',
+                    email: data.email || user.email || '',
+                    unit: data.unit || '',
+                    course: data.course || '',
+                    campus: data.campus || '',
+                });
+            } else {
+                 form.reset({
+                    displayName: user.displayName || '',
+                    email: user.email || '',
+                    unit: '',
+                    course: '',
+                    campus: '',
+                });
+            }
+        }
     }
+    fetchProfile();
   }, [user, form]);
 
   async function onSubmit(data: ProfileFormValues) {
@@ -81,20 +98,25 @@ export default function ProfilePage() {
     }
 
     try {
-      // Only displayName can be updated via updateProfile
       await updateProfile(user, {
         displayName: data.displayName,
       });
 
-      // To save unit, course, and campus, we would need a database like Firestore.
-      // This is a good next step to consider!
+      const userDocRef = doc(db, 'users', user.uid);
+      await setDoc(userDocRef, {
+        uid: user.uid,
+        displayName: data.displayName,
+        email: user.email,
+        unit: data.unit || '',
+        course: data.course || '',
+        campus: data.campus || '',
+      }, { merge: true });
 
       toast({
         title: 'Success',
-        description: 'Your display name has been updated.',
+        description: 'Your profile has been updated.',
       });
-      // Force a re-render or state update in useAuth if displayName doesn't update automatically
-      // This might require enhancing your AuthProvider
+
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -104,7 +126,7 @@ export default function ProfilePage() {
     }
   }
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <div className="space-y-8">
         <div>
