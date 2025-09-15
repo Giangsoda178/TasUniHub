@@ -7,4 +7,12 @@ export type Course = {
     imageUrl: string;
     imageHint: string;
   };
-  
+
+  export type ClassSchedule = {
+    day: string;
+    time: string;
+    course: string;
+    type: 'Class' | 'Tutorial';
+    location: string;
+    instructor: string;
+  };

@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
   BookCopy,
+  Calendar,
   Cpu,
   LayoutDashboard,
   LogOut,
@@ -45,6 +46,7 @@ import { auth } from '@/lib/firebase';
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/courses', icon: BookCopy, label: 'Courses' },
+  { href: '/timetable', icon: Calendar, label: 'Timetable' },
   { href: '/resources', icon: Cpu, label: 'AI Resources' },
   { href: '/profile', icon: UserIcon, label: 'Profile' },
 ];
