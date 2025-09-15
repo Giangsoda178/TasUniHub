@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { scheduleData } from '@/lib/schedule-data';
 import { ClassSchedule } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
@@ -15,27 +14,31 @@ const timeSlots = [
 
 const TimetableGrid = () => {
     const getEventForSlot = (day: string, time: string): ClassSchedule | undefined => {
+        const currentHour = parseInt(time.split(':')[0]);
         return scheduleData.find(event => {
             const [startTime] = event.time.split('-');
-            return event.day === day && startTime.startsWith(time.split(':')[0]);
+            const startHour = parseInt(startTime.split(':')[0]);
+            return event.day === day && startHour === currentHour;
         });
     }
 
-    const getEventDuration = (event: ClassSchedule): number => {
+    const getEventDurationInHours = (event: ClassSchedule): number => {
         const [start, end] = event.time.split('-');
         const startHour = parseInt(start.split(':')[0], 10);
+        const startMinutes = parseInt(start.split(':')[1], 10);
         const endHour = parseInt(end.split(':')[0], 10);
         const endMinutes = parseInt(end.split(':')[1], 10);
 
-        let duration = endHour - startHour;
-        if (endMinutes > 0) {
-            duration += 0.5; // for 30 min durations
-        }
-        return duration > 1 ? Math.ceil(duration) : duration
+        const startTime = startHour + startMinutes / 60;
+        const endTime = endHour + endMinutes / 60;
+        
+        return endTime - startTime;
     }
 
+    const renderedEvents = new Set<string>();
+
     return (
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-1">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-1 bg-background">
             {/* Time column */}
             <div className="hidden md:block">
                 {timeSlots.map(time => (
@@ -48,21 +51,16 @@ const TimetableGrid = () => {
             {/* Day columns */}
             {daysOfWeek.map(day => (
                 <div key={day} className="relative grid grid-rows-8">
-                     <h3 className="md:hidden text-lg font-semibold p-2">{day}</h3>
+                     <h3 className="md:hidden text-lg font-semibold p-2 sticky top-0 bg-background z-10">{day}</h3>
                     {timeSlots.map((time, index) => {
-                         const event = getEventForSlot(day, time);
-                         if(event) {
-                             const duration = getEventDuration(event);
-                             const isFirstSlot = event.time.startsWith(time.split(':')[0]);
+                        const event = getEventForSlot(day, time);
+                        
+                        if (event && !renderedEvents.has(event.course + event.time)) {
+                             renderedEvents.add(event.course + event.time);
+                             const duration = getEventDurationInHours(event);
                              
-                             const [start] = event.time.split('-');
-                             const startHour = parseInt(start.split(':')[0], 10);
-                             const currentHour = parseInt(time.split(':')[0], 10);
-
-                             if(startHour !== currentHour) return null;
-
                              return (
-                                <div key={`${day}-${time}`} className="relative row-span-1" style={{ gridRow: `span ${duration}` }}>
+                                <div key={`${day}-${time}`} className="relative" style={{ gridRow: `${index + 1} / span ${Math.ceil(duration)}` }}>
                                     <Card className={`absolute inset-1 bg-secondary flex flex-col`}>
                                         <CardContent className="p-2 flex flex-col justify-between flex-grow">
                                             <div>
@@ -80,7 +78,7 @@ const TimetableGrid = () => {
                          }
 
                         return (
-                            <div key={`${day}-${time}`} className="h-24 border-t border-dashed md:border-none"></div>
+                            <div key={`${day}-${time}`} className="h-24 border-t border-dashed -z-10"></div>
                         );
                     })}
                 </div>
@@ -109,7 +107,7 @@ export default function TimetablePage() {
                 ))}
             </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="overflow-x-auto">
           <TimetableGrid />
         </CardContent>
       </Card>
