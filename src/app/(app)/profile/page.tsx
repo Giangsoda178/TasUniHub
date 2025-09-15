@@ -33,6 +33,9 @@ const profileFormSchema = z.object({
     message: 'Display name must be at least 2 characters.',
   }),
   email: z.string().email(),
+  unit: z.string().optional(),
+  course: z.string().optional(),
+  campus: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -46,6 +49,9 @@ export default function ProfilePage() {
     defaultValues: {
       displayName: user?.displayName || '',
       email: user?.email || '',
+      unit: '',
+      course: '',
+      campus: '',
     },
     mode: 'onChange',
   });
@@ -55,6 +61,11 @@ export default function ProfilePage() {
       form.reset({
         displayName: user.displayName || '',
         email: user.email || '',
+        // These fields are not stored in Firebase Auth by default.
+        // We'll need a database like Firestore to persist them.
+        unit: '',
+        course: '',
+        campus: '',
       });
     }
   }, [user, form]);
@@ -70,12 +81,17 @@ export default function ProfilePage() {
     }
 
     try {
+      // Only displayName can be updated via updateProfile
       await updateProfile(user, {
         displayName: data.displayName,
       });
+
+      // To save unit, course, and campus, we would need a database like Firestore.
+      // This is a good next step to consider!
+
       toast({
         title: 'Success',
-        description: 'Your profile has been updated.',
+        description: 'Your display name has been updated.',
       });
       // Force a re-render or state update in useAuth if displayName doesn't update automatically
       // This might require enhancing your AuthProvider
@@ -128,7 +144,7 @@ export default function ProfilePage() {
         <CardHeader>
           <CardTitle>Profile Details</CardTitle>
           <CardDescription>
-            Update your display name. Your email address cannot be changed.
+            Update your account details. Your email address cannot be changed.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -155,6 +171,45 @@ export default function ProfilePage() {
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input placeholder="your.email@example.com" {...field} readOnly disabled />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="unit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Unit</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., KIT101" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="course"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Course</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Bachelor of ICT" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="campus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Campus</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Sandy Bay" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
