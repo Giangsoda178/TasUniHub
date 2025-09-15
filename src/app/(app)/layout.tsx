@@ -46,6 +46,7 @@ const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/courses', icon: BookCopy, label: 'Courses' },
   { href: '/resources', icon: Cpu, label: 'AI Resources' },
+  { href: '/profile', icon: UserIcon, label: 'Profile' },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -139,6 +140,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </p>
                   </div>
                 </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/profile">
+                    <UserIcon className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
