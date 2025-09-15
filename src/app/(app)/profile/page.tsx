@@ -34,7 +34,6 @@ const profileFormSchema = z.object({
   displayName: z.string().min(2, {
     message: 'Display name must be at least 2 characters.',
   }),
-  email: z.string().email(),
   unit: z.string().optional(),
   course: z.string().optional(),
   campus: z.string().optional(),
@@ -50,7 +49,6 @@ export default function ProfilePage() {
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       displayName: '',
-      email: '',
       unit: '',
       course: '',
       campus: '',
@@ -68,7 +66,6 @@ export default function ProfilePage() {
                 const data = userDoc.data();
                 form.reset({
                     displayName: data.displayName || user.displayName || '',
-                    email: data.email || user.email || '',
                     unit: data.unit || '',
                     course: data.course || '',
                     campus: data.campus || '',
@@ -76,7 +73,6 @@ export default function ProfilePage() {
             } else {
                  form.reset({
                     displayName: user.displayName || '',
-                    email: user.email || '',
                     unit: '',
                     course: '',
                     campus: '',
@@ -166,7 +162,7 @@ export default function ProfilePage() {
         <CardHeader>
           <CardTitle>Profile Details</CardTitle>
           <CardDescription>
-            Update your account details. Your email address cannot be changed.
+            Update your personal details. Your email address is linked to your account and cannot be changed here.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -180,19 +176,6 @@ export default function ProfilePage() {
                     <FormLabel>Display Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Your Name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="your.email@example.com" {...field} readOnly disabled />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
