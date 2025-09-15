@@ -16,3 +16,13 @@ export type Course = {
     location: string;
     instructor: string;
   };
+
+  export type UserProfile = {
+    uid: string;
+    displayName: string;
+    email: string;
+    unit?: string;
+    course?: string;
+    campus?: string;
+    schedule?: ClassSchedule[];
+  };

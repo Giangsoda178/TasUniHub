@@ -29,6 +29,7 @@ import { useAuth } from '@/components/auth-provider';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { db } from '@/lib/firebase';
+import { scheduleData } from '@/lib/schedule-data';
 
 const profileFormSchema = z.object({
   displayName: z.string().min(2, {
@@ -106,6 +107,7 @@ export default function ProfilePage() {
         unit: data.unit || '',
         course: data.course || '',
         campus: data.campus || '',
+        schedule: scheduleData
       }, { merge: true });
 
       toast({

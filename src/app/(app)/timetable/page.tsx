@@ -1,9 +1,13 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { scheduleData } from '@/lib/schedule-data';
-import { ClassSchedule } from '@/lib/types';
+import { ClassSchedule, UserProfile } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/components/auth-provider';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
@@ -12,7 +16,7 @@ const timeSlots = [
 ];
 
 
-const TimetableGrid = () => {
+const TimetableGrid = ({ scheduleData }: { scheduleData: ClassSchedule[] }) => {
     const getEventForSlot = (day: string, time: string): ClassSchedule | undefined => {
         return scheduleData.find(event => {
             const [startTime] = event.time.split('-');
@@ -103,6 +107,41 @@ const TimetableGrid = () => {
 
 
 export default function TimetablePage() {
+    const { user } = useAuth();
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchProfile() {
+            if (user) {
+                const userDocRef = doc(db, 'users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                if (userDoc.exists()) {
+                    setProfile(userDoc.data() as UserProfile);
+                }
+                setLoading(false);
+            }
+        }
+        fetchProfile();
+      }, [user]);
+
+  if (loading) {
+    return (
+        <div className="space-y-8">
+            <div>
+                <Skeleton className="h-10 w-1/3" />
+                <Skeleton className="h-4 w-1/2 mt-2" />
+            </div>
+            <Card>
+                <CardContent className="overflow-x-auto p-0 md:p-6">
+                    <Skeleton className="h-[788px] w-full" />
+                </CardContent>
+            </Card>
+        </div>
+    )
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -114,7 +153,13 @@ export default function TimetablePage() {
 
       <Card>
         <CardContent className="overflow-x-auto p-0 md:p-6">
-          <TimetableGrid />
+          {profile?.schedule ? (
+            <TimetableGrid scheduleData={profile.schedule} />
+          ) : (
+            <div className="flex items-center justify-center h-96">
+                <p className="text-muted-foreground">No schedule found. Please update your profile.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
