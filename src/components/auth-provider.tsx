@@ -18,15 +18,20 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
+      if (user && pathname === '/') {
+        router.push('/dashboard');
+      }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [pathname, router]);
 
   return (
     <AuthContext.Provider value={{ user, loading }}>

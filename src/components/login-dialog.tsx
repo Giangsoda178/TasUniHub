@@ -64,7 +64,7 @@ export function LoginDialog({ children }: LoginDialogProps) {
       description: `Welcome ${user.email}`,
     });
     setOpen(false);
-    router.push('/dashboard');
+    // The redirect is now handled by the AuthProvider
   };
 
   const handleAuthError = (error: any) => {
