@@ -112,6 +112,10 @@ export default function ProfilePage() {
 
       toast({
         title: 'Success',
+        // Profile page for viewing and editing user information
+        // Uses React Hook Form and Zod for form validation
+        // Integrates with Firebase for profile updates and data storage
+        // Imports UI components for consistent design
         description: 'Your profile has been updated.',
       });
 
@@ -125,6 +129,7 @@ export default function ProfilePage() {
   }
 
   if (loading || !user) {
+        // Type for form values based on schema
     return (
       <div className="space-y-8">
         <div>
