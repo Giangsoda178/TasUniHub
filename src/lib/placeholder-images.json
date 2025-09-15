@@ -1,3 +1,28 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-image",
+      "description": "A stunning view of the University of Tasmania campus.",
+      "imageUrl": "https://picsum.photos/seed/utas-hero/1920/1080",
+      "imageHint": "university campus"
+    },
+    {
+      "id": "course-1",
+      "description": "Students collaborating in a modern classroom.",
+      "imageUrl": "https://picsum.photos/seed/course1/600/400",
+      "imageHint": "students learning"
+    },
+    {
+      "id": "course-2",
+      "description": "A lecturer giving a presentation in a large hall.",
+      "imageUrl": "https://picsum.photos/seed/course2/600/400",
+      "imageHint": "lecture hall"
+    },
+    {
+      "id": "course-3",
+      "description": "Close-up of a science experiment in a lab.",
+      "imageUrl": "https://picsum.photos/seed/course3/600/400",
+      "imageHint": "science lab"
+    }
+  ]
 }
