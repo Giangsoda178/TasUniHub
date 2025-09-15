@@ -38,7 +38,12 @@ export async function getStudySuggestions(
 
 const prompt = ai.definePrompt({
   name: 'studySuggestionsPrompt',
-  input: {schema: StudySuggestionsInputSchema},
+  input: {schema: z.object({
+    studentId: StudySuggestionsInputSchema.shape.studentId,
+    enrolledCourses: StudySuggestionsInputSchema.shape.enrolledCourses,
+    grades: z.array(z.string()).describe("A list of courses and grades, formatted as 'CourseCode: Grade'."),
+    upcomingAssignments: StudySuggestionsInputSchema.shape.upcomingAssignments,
+  })},
   output: {schema: StudySuggestionsOutputSchema},
   prompt: `You are an AI study assistant helping University of Tasmania students organize their studies.
 
@@ -46,7 +51,7 @@ const prompt = ai.definePrompt({
 
   Student ID: {{{studentId}}}
   Enrolled Courses: {{#each enrolledCourses}}{{{this}}}, {{/each}}
-  Grades: {{#each (Object.entries grades)}}{{{this.[0]}}}: {{{this.[1]}}}, {{/each}}
+  Grades: {{#each grades}}{{{this}}}, {{/each}}
   Upcoming Assignments: {{#each upcomingAssignments}}{{{this}}}, {{/each}}
 
   Suggestions:
@@ -60,7 +65,12 @@ const studySuggestionsFlow = ai.defineFlow(
     outputSchema: StudySuggestionsOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const gradesAsStrings = Object.entries(input.grades).map(([courseCode, grade]) => `${courseCode}: ${grade}`);
+
+    const {output} = await prompt({
+        ...input,
+        grades: gradesAsStrings,
+    });
     return output!;
   }
 );
