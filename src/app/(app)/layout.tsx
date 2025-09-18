@@ -24,6 +24,7 @@ import {
   LayoutDashboard,
   LogOut,
   User as UserIcon,
+  Settings,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -45,7 +46,7 @@ import { auth } from '@/lib/firebase';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/courses', icon: BookCopy, label: 'Courses' },
+  // { href: '/courses', icon: BookCopy, label: 'Courses' },
   { href: '/timetable', icon: Calendar, label: 'Timetable' },
   { href: '/resources', icon: Cpu, label: 'AI Resources' },
   { href: '/profile', icon: UserIcon, label: 'Profile' },
@@ -119,16 +120,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       <SidebarInset>
         <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-sm">
-          <div className="container flex h-14 items-center">
+          <div className="w-full flex h-14 items-center">
             <SidebarTrigger className="md:hidden" />
             <div className="flex-1" />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
-                    <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
-                  </Avatar>
+                <Button variant="ghost" className="relative mx-5 h-9 w-9 rounded-full flex items-center justify-center bg-zinc-800 hover:bg-zinc-600 transition-colors">
+                  <Settings className="h-8 w-8 text-white" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
