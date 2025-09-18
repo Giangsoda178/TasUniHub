@@ -90,7 +90,7 @@ const TimetableGrid = ({ scheduleData }: { scheduleData: ClassSchedule[] }) => {
                                         >
                                             <CardContent className="p-4 flex flex-col justify-between flex-grow">
                                                 <div>
-                                                    <p className="font-semibold text-xl leading-tight">{event.course}</p>
+                                                    <p className="font-semibold text-xl leading-tight mb-2">{event.course}</p>
                                                     <p className="text-s text-muted-foreground">{event.location}</p>
                                                 </div>
                                                 <div className="flex items-center justify-between mt-1">
