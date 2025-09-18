@@ -88,7 +88,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarHeader className="p-4">
           <Link href="/dashboard" className="flex items-center gap-2">
             <UTasLogo className="size-8 text-primary" />
-            <span className="text-lg font-semibold">TasUni Hub</span>
+            <span className="text-lg font-semibold">UTAS Coursemate</span>
           </Link>
         </SidebarHeader>
         <SidebarContent>
