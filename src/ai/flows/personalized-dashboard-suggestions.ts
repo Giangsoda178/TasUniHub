@@ -13,10 +13,10 @@ import {z} from 'genkit';
 
 const StudySuggestionsInputSchema = z.object({
   studentId: z.string().describe('The unique identifier of the student.'),
-  enrolledCourses: z
+  enrolledUnits: z
     .array(z.string())
-    .describe('A list of the student`s enrolled courses.'),
-  grades: z.record(z.number()).describe('A map of course IDs to grades.'),
+    .describe('A list of the student`s enrolled units.'),
+  grades: z.record(z.number()).describe('A map of unit IDs to grades.'),
 });
 export type StudySuggestionsInput = z.infer<typeof StudySuggestionsInputSchema>;
 
@@ -37,16 +37,16 @@ const prompt = ai.definePrompt({
   name: 'studySuggestionsPrompt',
   input: {schema: z.object({
     studentId: StudySuggestionsInputSchema.shape.studentId,
-    enrolledCourses: StudySuggestionsInputSchema.shape.enrolledCourses,
-    grades: z.array(z.string()).describe("A list of courses and grades, formatted as 'CourseCode: Grade'."),
+    enrolledUnits: StudySuggestionsInputSchema.shape.enrolledUnits,
+    grades: z.array(z.string()).describe("A list of units and grades, formatted as 'UnitCode: Grade'."),
   })},
   output: {schema: StudySuggestionsOutputSchema},
   prompt: `You are an AI study assistant helping University of Tasmania students organize their studies.
 
-  Based on the student's enrolled courses and grades, provide a list of actionable suggestions to help them manage their time effectively and improve their academic performance.
+  Based on the student's enrolled units and grades, provide a list of actionable suggestions to help them manage their time effectively and improve their academic performance.
 
   Student ID: {{{studentId}}}
-  Enrolled Courses: {{#each enrolledCourses}}{{{this}}}, {{/each}}
+  Enrolled Units: {{#each enrolledUnits}}{{{this}}}, {{/each}}
   Grades: {{#each grades}}{{{this}}}, {{/each}}
 
   Suggestions:

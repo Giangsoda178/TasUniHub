@@ -38,7 +38,7 @@ const chartConfig = {
     },
 } satisfies ChartConfig;
 
-type EnrolledCourse = {
+type EnrolledUnit = {
     code: string;
     name: string;
     grade: number | null;
@@ -48,10 +48,10 @@ type EnrolledCourse = {
 
 type DashboardClientProps = {
   suggestions: string[];
-  enrolledCourses: EnrolledCourse[];
+  enrolledUnits: EnrolledUnit[];
 };
 
-export default function DashboardClient({ suggestions, enrolledCourses }: DashboardClientProps) {
+export default function DashboardClient({ suggestions, enrolledUnits }: DashboardClientProps) {
   return (
     <div className="grid gap-8">
       <div>
@@ -145,25 +145,25 @@ export default function DashboardClient({ suggestions, enrolledCourses }: Dashbo
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Enrolled Courses</CardTitle>
-            <CardDescription>Your courses for the current academic session.</CardDescription>
+            <CardTitle className="mb-2">Units</CardTitle>
+            <CardDescription className="text-md">Your passed and enrolled units</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Code</TableHead>
+                        <TableHead>Unit Code</TableHead>
                         <TableHead>Name</TableHead>
                         <TableHead>Status</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {enrolledCourses.map((course) => (
-                        <TableRow key={course.code}>
-                            <TableCell className="font-medium">{course.code}</TableCell>
-                            <TableCell>{course.name}</TableCell>
+                    {enrolledUnits.map((unit) => (
+                        <TableRow key={unit.code}>
+                            <TableCell className="font-medium">{unit.code}</TableCell>
+                            <TableCell>{unit.name}</TableCell>
                             <TableCell>
-                                <Badge variant={course.status === 'Completed' ? 'secondary' : 'default'}>{course.status}</Badge>
+                                <Badge variant={unit.status === 'Completed' ? 'secondary' : 'default'}>{unit.status}</Badge>
                             </TableCell>
                         </TableRow>
                     ))}
