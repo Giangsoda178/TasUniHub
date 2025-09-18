@@ -78,7 +78,16 @@ const TimetableGrid = ({ scheduleData }: { scheduleData: ClassSchedule[] }) => {
                                             height: `${duration * 6}rem`
                                         }}
                                     >
-                                        <Card className="bg-secondary h-full flex flex-col shadow-md">
+                                        <Card
+                                            className={
+                                                `h-full flex flex-col shadow-md ` +
+                                                (event.type === 'lecture'
+                                                    ? 'bg-green-100'
+                                                    : event.type === 'tutorial'
+                                                        ? 'bg-blue-100'
+                                                        : 'bg-secondary')
+                                            }
+                                        >
                                             <CardContent className="p-2 flex flex-col justify-between flex-grow">
                                                 <div>
                                                     <p className="font-semibold text-xl leading-tight">{event.course}</p>
