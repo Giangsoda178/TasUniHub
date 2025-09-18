@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 const timeSlots = [
-  '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'
+  '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'
 ];
 
 
@@ -40,12 +40,12 @@ const TimetableGrid = ({ scheduleData }: { scheduleData: ClassSchedule[] }) => {
     const renderedEvents = new Set<string>();
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_1fr_1fr_1fr_1fr] min-w-[700px]">
+        <div className="grid grid-cols-1 md:grid-cols-[50px_1fr_1fr_1fr_1fr_1fr] min-w-[700px]">
             {/* Time column */}
             <div className="hidden md:flex flex-col">
                 <div className="h-10"></div>
                 {timeSlots.map(time => (
-                    <div key={time} className="h-24 flex items-center justify-center -mt-3 text-sm font-medium text-muted-foreground">
+                    <div key={time} className="h-24 flex items-center justify-left -mt-3 text-sm font-medium text-muted-foreground">
                         {time}
                     </div>
                 ))}
@@ -88,14 +88,19 @@ const TimetableGrid = ({ scheduleData }: { scheduleData: ClassSchedule[] }) => {
                                                         : 'bg-secondary')
                                             }
                                         >
-                                            <CardContent className="p-2 flex flex-col justify-between flex-grow">
+                                            <CardContent className="p-4 flex flex-col justify-between flex-grow">
                                                 <div>
                                                     <p className="font-semibold text-xl leading-tight">{event.course}</p>
                                                     <p className="text-s text-muted-foreground">{event.location}</p>
                                                 </div>
                                                 <div className="flex items-center justify-between mt-1">
-                                                     <Badge variant={event.type === 'Class' ? 'default' : 'outline'} className="text-xs">{event.type}</Badge>
-                                                     <p className="text-s text-muted-foreground">{event.time}</p>
+                                                    <Badge
+                                                        variant={event.type === 'Class' ? 'default' : 'outline'}
+                                                        className={event.type === 'Class' ? 'text-lg' : 'text-md border-black text-black'}
+                                                    >
+                                                        {event.type}
+                                                    </Badge>
+                                                    <p className="text-s text-black">{event.time}</p>
                                                 </div>
                                             </CardContent>
                                         </Card>
