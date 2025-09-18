@@ -17,9 +17,6 @@ const StudySuggestionsInputSchema = z.object({
     .array(z.string())
     .describe('A list of the student`s enrolled courses.'),
   grades: z.record(z.number()).describe('A map of course IDs to grades.'),
-  upcomingAssignments: z
-    .array(z.string())
-    .describe('A list of upcoming assignments.'),
 });
 export type StudySuggestionsInput = z.infer<typeof StudySuggestionsInputSchema>;
 
@@ -42,17 +39,15 @@ const prompt = ai.definePrompt({
     studentId: StudySuggestionsInputSchema.shape.studentId,
     enrolledCourses: StudySuggestionsInputSchema.shape.enrolledCourses,
     grades: z.array(z.string()).describe("A list of courses and grades, formatted as 'CourseCode: Grade'."),
-    upcomingAssignments: StudySuggestionsInputSchema.shape.upcomingAssignments,
   })},
   output: {schema: StudySuggestionsOutputSchema},
   prompt: `You are an AI study assistant helping University of Tasmania students organize their studies.
 
-  Based on the student's enrolled courses, grades, and upcoming assignments, provide a list of actionable suggestions to help them manage their time effectively and improve their academic performance.
+  Based on the student's enrolled courses and grades, provide a list of actionable suggestions to help them manage their time effectively and improve their academic performance.
 
   Student ID: {{{studentId}}}
   Enrolled Courses: {{#each enrolledCourses}}{{{this}}}, {{/each}}
   Grades: {{#each grades}}{{{this}}}, {{/each}}
-  Upcoming Assignments: {{#each upcomingAssignments}}{{{this}}}, {{/each}}
 
   Suggestions:
   `,

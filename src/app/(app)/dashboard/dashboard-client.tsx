@@ -45,23 +45,17 @@ type EnrolledCourse = {
     status: string;
 };
 
-type UpcomingAssignment = {
-    name: string;
-    course: string;
-    due: string;
-};
 
 type DashboardClientProps = {
-    suggestions: string[];
-    enrolledCourses: EnrolledCourse[];
-    upcomingAssignments: UpcomingAssignment[];
+  suggestions: string[];
+  enrolledCourses: EnrolledCourse[];
 };
 
-export default function DashboardClient({ suggestions, enrolledCourses, upcomingAssignments }: DashboardClientProps) {
+export default function DashboardClient({ suggestions, enrolledCourses }: DashboardClientProps) {
   return (
     <div className="grid gap-8">
       <div>
-        <h1 className="font-headline text-3xl font-bold">Welcome Back, Student!</h1>
+        <h1 className="font-headline text-3xl font-bold">Welcome back, Student!</h1>
         <p className="text-muted-foreground">Here’s what’s happening with your studies.</p>
       </div>
 
@@ -171,32 +165,6 @@ export default function DashboardClient({ suggestions, enrolledCourses, upcoming
                             <TableCell>
                                 <Badge variant={course.status === 'Completed' ? 'secondary' : 'default'}>{course.status}</Badge>
                             </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Upcoming Assignments</CardTitle>
-            <CardDescription>Stay on top of your deadlines.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Assignment</TableHead>
-                        <TableHead>Course</TableHead>
-                        <TableHead>Due In</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {upcomingAssignments.map((assignment, index) => (
-                        <TableRow key={index}>
-                            <TableCell className="font-medium">{assignment.name}</TableCell>
-                            <TableCell>{assignment.course}</TableCell>
-                            <TableCell>{assignment.due}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
