@@ -48,8 +48,8 @@ const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   // { href: '/courses', icon: BookCopy, label: 'Courses' },
   { href: '/timetable', icon: Calendar, label: 'Timetable' },
-  { href: '/resources', icon: Cpu, label: 'AI Resources' },
   { href: '/profile', icon: UserIcon, label: 'Profile' },
+  { href: '/resources', icon: Cpu, label: 'AI Resources' },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
