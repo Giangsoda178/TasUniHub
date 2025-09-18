@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ClassSchedule, UserProfile } from '@/lib/types';
+import { ClassSchedule } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/components/auth-provider';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -81,12 +81,12 @@ const TimetableGrid = ({ scheduleData }: { scheduleData: ClassSchedule[] }) => {
                                         <Card className="bg-secondary h-full flex flex-col shadow-md">
                                             <CardContent className="p-2 flex flex-col justify-between flex-grow">
                                                 <div>
-                                                    <p className="font-semibold text-xs leading-tight">{event.course}</p>
-                                                    <p className="text-xs text-muted-foreground">{event.location}</p>
+                                                    <p className="font-semibold text-xl leading-tight">{event.course}</p>
+                                                    <p className="text-s text-muted-foreground">{event.location}</p>
                                                 </div>
                                                 <div className="flex items-center justify-between mt-1">
                                                      <Badge variant={event.type === 'Class' ? 'default' : 'outline'} className="text-xs">{event.type}</Badge>
-                                                     <p className="text-xs text-muted-foreground">{event.time}</p>
+                                                     <p className="text-s text-muted-foreground">{event.time}</p>
                                                 </div>
                                             </CardContent>
                                         </Card>
@@ -95,7 +95,7 @@ const TimetableGrid = ({ scheduleData }: { scheduleData: ClassSchedule[] }) => {
                             }
                             // Render empty slots for grid lines
                             return (
-                                <div key={`${day}-${time}`} className="h-24 border-t border-dashed -z-10"></div>
+                                <div key={`${day}-${time}`} className="h-24 border-t-2 border-red-500 border-solid -z-10"></div>
                             );
                         })}
                     </div>
@@ -108,22 +108,42 @@ const TimetableGrid = ({ scheduleData }: { scheduleData: ClassSchedule[] }) => {
 
 export default function TimetablePage() {
     const { user } = useAuth();
-    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [schedule, setSchedule] = useState<ClassSchedule[] | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        async function fetchProfile() {
+        async function fetchClasses() {
             if (user) {
-                const userDocRef = doc(db, 'users', user.uid);
-                const userDoc = await getDoc(userDocRef);
-
-                if (userDoc.exists()) {
-                    setProfile(userDoc.data() as UserProfile);
+                // Query Firestore for student by email
+                const studentsRef = collection(db, 'students');
+                const q = query(studentsRef, where('email', '==', user.email));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    // Use the first matching document
+                    const data = querySnapshot.docs[0].data();
+                    const classes = data.classes || {};
+                    // Flatten classes object into ClassSchedule[]
+                    const scheduleArr: ClassSchedule[] = [];
+                    Object.entries(classes).forEach(([course, classList]) => {
+                        (classList as any[]).forEach(cls => {
+                            scheduleArr.push({
+                                course,
+                                type: cls.type,
+                                day: cls.day,
+                                time: `${cls.start}-${cls.end}`,
+                                location: cls.location || '',
+                                instructor: cls.instructor || '',
+                            });
+                        });
+                    });
+                    setSchedule(scheduleArr);
+                } else {
+                    setSchedule(null);
                 }
                 setLoading(false);
             }
         }
-        fetchProfile();
+        fetchClasses();
       }, [user]);
 
   if (loading) {
@@ -142,26 +162,26 @@ export default function TimetablePage() {
     )
   }
 
-  return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="font-headline text-3xl font-bold">Your Timetable</h1>
-        <p className="text-lg mt-4 text-muted-foreground">
-          Your weekly lecture and tutorial schedule
-        </p>
-      </div>
-
-      <Card>
-        <CardContent className="overflow-x-auto p-0 md:p-6">
-          {profile?.schedule ? (
-            <TimetableGrid scheduleData={profile.schedule} />
-          ) : (
-            <div className="flex items-center justify-center h-96">
-                <p className="text-muted-foreground">No schedule found. Please update your profile.</p>
+    return (
+        <div className="space-y-8">
+            <div>
+                <h1 className="font-headline text-3xl font-bold">Your Timetable</h1>
+                <p className="text-lg mt-4 text-muted-foreground">
+                    Your weekly lecture and tutorial schedule
+                </p>
             </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
+
+            <Card>
+                <CardContent className="overflow-x-auto p-0 md:p-6">
+                    {schedule && schedule.length > 0 ? (
+                        <TimetableGrid scheduleData={schedule} />
+                    ) : (
+                        <div className="flex items-center justify-center h-96">
+                                <p className="text-muted-foreground">No schedule found. Please update your profile.</p>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+        </div>
+    );
 }
