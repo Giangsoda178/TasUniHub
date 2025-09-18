@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { updateProfile } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -32,12 +32,16 @@ import { db } from '@/lib/firebase';
 import { scheduleData } from '@/lib/schedule-data';
 
 const profileFormSchema = z.object({
-  displayName: z.string().min(2, {
-    message: 'Display name must be at least 2 characters.',
+  firstName: z.string().min(2, {
+    message: 'First name must be at least 2 characters.',
   }),
-  unit: z.string().optional(),
-  course: z.string().optional(),
-  campus: z.string().optional(),
+  lastName: z.string().min(2, {
+    message: 'Last name must be at least 2 characters.',
+  }),
+  studentID: z
+    .string()
+    .regex(/^\d{6}$/, { message: 'Student ID must be a 6-digit number.' }),
+  email: z.string().email({ message: 'Invalid email address.' }),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -49,37 +53,39 @@ export default function ProfilePage() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      displayName: '',
-      unit: '',
-      course: '',
-      campus: '',
+      firstName: '',
+      lastName: '',
+      studentID: '',
+      email: '',
     },
     mode: 'onChange',
   });
 
   useEffect(() => {
     async function fetchProfile() {
-        if (user) {
-            const userDocRef = doc(db, 'users', user.uid);
-            const userDoc = await getDoc(userDocRef);
-
-            if (userDoc.exists()) {
-                const data = userDoc.data();
-                form.reset({
-                    displayName: data.displayName || user.displayName || '',
-                    unit: data.unit || '',
-                    course: data.course || '',
-                    campus: data.campus || '',
-                });
-            } else {
-                 form.reset({
-                    displayName: user.displayName || '',
-                    unit: '',
-                    course: '',
-                    campus: '',
-                });
-            }
+      if (user) {
+        // Query Firestore for student by email
+        const studentsRef = collection(db, 'students');
+        const q = query(studentsRef, where('email', '==', user.email));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          // Use the first matching document
+          const data = querySnapshot.docs[0].data();
+          form.reset({
+            firstName: data.first_name || '',
+            lastName: data.last_name || '',
+            studentID: data.student_id || '',
+            email: data.email || user.email || '',
+          });
+        } else {
+          form.reset({
+            firstName: user.displayName || '',
+            lastName: '',
+            studentID: '',
+            email: user.email || '',
+          });
         }
+      }
     }
     fetchProfile();
   }, [user, form]);
@@ -95,27 +101,27 @@ export default function ProfilePage() {
     }
 
     try {
+      // Update displayName in Firebase Auth
       await updateProfile(user, {
-        displayName: data.displayName,
+        displayName: `${data.firstName} ${data.lastName}`,
       });
 
-      const userDocRef = doc(db, 'users', user.uid);
-      await setDoc(userDocRef, {
-        uid: user.uid,
-        displayName: data.displayName,
-        email: user.email,
-        unit: data.unit || '',
-        course: data.course || '',
-        campus: data.campus || '',
-        schedule: scheduleData
-      }, { merge: true });
+      // Update by email (track by user email, not UID)
+      if (!user.email) throw new Error('User email not found');
+      // Find the document with matching email
+      const studentsRef = collection(db, 'students');
+      const q = query(studentsRef, where('email', '==', user.email));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const docRef = querySnapshot.docs[0].ref;
+        await setDoc(docRef, {
+          first_name: data.firstName,
+          last_name: data.lastName,
+        }, { merge: true });
+      }
 
       toast({
         title: 'Success',
-        // Profile page for viewing and editing user information
-        // Uses React Hook Form and Zod for form validation
-        // Integrates with Firebase for profile updates and data storage
-        // Imports UI components for consistent design
         description: 'Your profile has been updated.',
       });
 
@@ -161,67 +167,58 @@ export default function ProfilePage() {
     <div className="space-y-8">
        <div>
         <h1 className="font-headline text-3xl font-bold">Your Profile</h1>
-        <p className="text-muted-foreground">
-          Manage your account settings and personal information.
-        </p>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile Details</CardTitle>
-          <CardDescription>
-            Update your personal details. Your email address is linked to your account and cannot be changed here.
-          </CardDescription>
-        </CardHeader>
+  <Card className="pt-6 text-xl">
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 text-xl">
               <FormField
                 control={form.control}
-                name="displayName"
+                name="firstName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Display Name</FormLabel>
+                    <FormLabel className="text-lg">First Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your Name" {...field} />
+                      <Input placeholder="First Name" {...field} className="text-lg" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-               <FormField
+              <FormField
                 control={form.control}
-                name="unit"
+                name="lastName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Unit</FormLabel>
+                    <FormLabel className="text-lg">Last Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., KIT101" {...field} />
+                      <Input placeholder="Last Name" {...field} className="text-lg" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-               <FormField
+              <FormField
                 control={form.control}
-                name="course"
+                name="studentID"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Course</FormLabel>
+                    <FormLabel className="text-lg">Student ID</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Bachelor of ICT" {...field} />
+                      <Input placeholder="e.g., 123456" {...field} readOnly className="text-lg" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-               <FormField
+              <FormField
                 control={form.control}
-                name="campus"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Campus</FormLabel>
+                    <FormLabel className="text-lg">Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Sandy Bay" {...field} />
+                      <Input placeholder="e.g., student@utas.edu.au" {...field} readOnly className="text-lg" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
