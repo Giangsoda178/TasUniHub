@@ -195,7 +195,7 @@ export function LoginDialog({ children }: LoginDialogProps) {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="items-center text-center">
             <UTasLogo className="h-12 w-12 text-primary"/>
-          <DialogTitle className="font-headline text-2xl">Welcome to TasUni Hub</DialogTitle>
+          <DialogTitle className="font-headline text-2xl">Welcome to UTAS Coursemate</DialogTitle>
           <DialogDescription>
             Sign in or create an account to continue.
           </DialogDescription>
