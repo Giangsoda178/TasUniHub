@@ -146,8 +146,8 @@ export default function TimetablePage() {
     <div className="space-y-8">
       <div>
         <h1 className="font-headline text-3xl font-bold">Your Timetable</h1>
-        <p className="text-muted-foreground">
-          Your weekly class and tutorial schedule.
+        <p className="text-lg mt-4 text-muted-foreground">
+          Your weekly lecture and tutorial schedule
         </p>
       </div>
 
